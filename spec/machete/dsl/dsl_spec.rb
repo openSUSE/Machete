@@ -6,7 +6,7 @@ module Machete::DSL
       @builder = Builder.new
     end
 
-    it "should respond to top level method" do
+    it "respond to top level method" do
       @builder.should respond_to :send_with_arguments
     end
 
@@ -17,47 +17,56 @@ module Machete::DSL
         end
       end
 
-      it "should return proper key in hash" do
-        @result.should include(:SendWithArguments)
-      end
-
-      it "should have empty key" do
-        @result[:SendWithArguments].should == {}
+      it "return proper hash" do
+        @result.should == { :SendWithArguments => {} }
       end
     end
 
-    context "build hash with arguments" do
-      before do
-        @result = Builder.build do
-          send_with_arguments do
-            attribute_1(value: 1)
-            attribute_2(value: 2)
-            array(:array) do
-              attribute_2(value: 2)
-              attribute_3(value: 3)
-            end
-            attribute_4 do
-              nested_attribute(value: "nested")
+    context "build hash with arguments and blocks" do
+      it "work with blocks" do
+        result = Builder.build do
+          attribute_1 do
+            attribute_2(:value => 2)
+          end
+        end
+
+        result.should == { :attribute_1 => { :attribute_2 => { :value => 2 } } }
+      end
+
+      it "work with hash" do
+        result = Builder.build do
+          attribute_1(:value => 1)
+        end
+
+        result.should == { :attribute_1 => { :value => 1 } }
+      end
+
+      it "work with arrays" do
+        result = Builder.build do
+          attributes(:array) do
+            attribute_1(:value => 1)
+            attribute_1(:value => 2)
+          end
+        end
+
+        result.should ==  {
+                            :attributes =>  [
+                                              { :attribute_1 => { :value => 1 } },
+                                              { :attribute_1 => { :value => 2 } }
+                                            ]
+                          }
+      end
+
+      it "work with nested attributes" do
+        result = Builder.build do
+          attribute_1 do
+            attribute_2 do
+              nested_attribute(:value => "nested")
             end
           end
         end
-        @attributes = @result[:SendWithArguments]
-      end
 
-      it "should work with blocks" do
-        @attributes.should include(:attribute_1 => {value: 1})
-      end
-
-      it "should work with hash" do
-        @attributes.should include(:attribute_2 => {value: 2})
-      end
-
-      it "should work with many attributes with the same name (arrays)" do
-        @attributes.should include(:array => [{:attribute_2 => {value: 2}}, {:attribute_3 => {value: 3}}])
-      end
-
-      it "should work with nested attributes" do
-        @attributes[:attribute_4][:nested_attribute].should == {:value => "nested"}
+        result.should == { :attribute_1 => { :attribute_2 => { :nested_attribute => { :value => "nested" } } } }
       end
     end
 
@@ -70,12 +79,12 @@ module Machete::DSL
         end
       end
 
-      it "should respond to special methods" do
-        @builder.should respond_to(:_super)
+      it "respond to special methods" do
+        @builder.should respond_to(:_send)
       end
 
-      it "should build proper hash with special method" do
-        @result.should include(:Send => { :attribute_1 => { value: true } })
+      it "build proper hash with special method" do
+        @result.should == { :Send => { :attribute_1 => { :value => true } } }
       end
     end
   end

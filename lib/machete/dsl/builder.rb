@@ -2,24 +2,31 @@ module Machete
   module DSL
     class Builder
       RESERVED_WORDS = [
-        :For, :If, :Alias, :Next, :Not, :Super, :When, :Case,
-        :While,:Yield, :Class, :Module, :And, :Break, :Send,
+        "for", "if", "alias", "next", "not", "super", "when", "case",
+        "while", "yield", "class", "module", "and", "break", "send",
       ].freeze
 
       attr_accessor :tree
 
-      def self.build(array=false, &block)
-        mb = Builder.new(array)
+      def self.build(type = :hash, &block)
+        mb = Builder.new(type)
         mb.instance_eval(&block) if block_given?
         mb.tree
       end
 
       def self.dsl_method_name(name)
-        if result = name.to_s.gsub!(/(.)([A-Z])/,'\1_\2')
-          result.downcase
-        else
-          RESERVED_WORDS.include?(name) ? ("_" + name.to_s.downcase) : name.to_s.downcase
-        end
+        method_name = underscore(name)
+        prefix = RESERVED_WORDS.include?(method_name) ? "_" : ""
+
+        prefix + method_name
+      end
+
+      def self.underscore(camel_cased_word)
+        camel_cased_word.to_s.gsub(/::/, '/').
+            gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+            gsub(/([a-z\d])([A-Z])/,'\1_\2').
+            tr("-", "_").
+            downcase
       end
 
       Rubinius::AST.constants.each do |top_method|
@@ -28,17 +35,22 @@ module Machete
         end
       end
 
-      def initialize(array=false)
-        @tree = array ? Array.new : Hash.new
+      def initialize(type = :hash)
+        if type == :array
+          @tree = Array.new
+        else
+          @tree = Hash.new
+        end
       end
 
-      def method_missing method, *args, &block
-        if block && args.first == :array
-          add_element(method, Builder.build(true, &block))
-        elsif block
-          add_element(method, Builder.build(&block))
-        elsif (args.first.is_a?(Hash) || args.first.is_a?(String))
+      def method_missing(method, *args, &block)
+        # fixnum_literal { ... }
+        if block
+          add_element(method, Builder.build(args.first, &block))
+        # fixnum_literal(value => 1) or fixnum_literal("value")
+        elsif (args.first.is_a?(Hash)) || (args.first.is_a?(String))
           add_element(method, args.first)
+        # fixnum_literal( [ symbol_literal(value => :symbol) ] )
         else
           {method => args.first}
         end
