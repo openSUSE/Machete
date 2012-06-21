@@ -420,6 +420,9 @@ module Machete
       ':a!'.should be_parsed_as(LiteralMatcher.new(:a!))
       ':a='.should be_parsed_as(LiteralMatcher.new(:a=))
 
+      # Instance vartiable name
+      ':@value'.should be_parsed_as(LiteralMatcher.new(:@value))
+
       # Operators (sorted alphabetically)
       ':%'.should be_parsed_as(LiteralMatcher.new(:%))
       ':&'.should be_parsed_as(LiteralMatcher.new(:&))
