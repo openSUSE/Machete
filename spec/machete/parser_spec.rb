@@ -105,6 +105,18 @@ module Machete
           /\[\]\{\}\(\)\|\-\*\.\\\?\+\^\$\ \#\t\f\v\n\r/
         ))
       )
+
+      'Foo<a @= /0[xX][0-9a-fA-F]+(_[0-9a-fA-F]+)*/>'.should be_parsed_as(
+        NodeMatcher.new(:Foo, :a => RegexpMatcher.new(
+          /0[xX][0-9a-fA-F]+(_[0-9a-fA-F]+)*/
+        ))
+      )
+
+      'Foo<a @= /^\/[A-Z]?[^\w]*_true$/>'.should be_parsed_as(
+        NodeMatcher.new(:Foo, :a => RegexpMatcher.new(
+          /^\/[A-Z]?[^\w]*_true$/
+        ))
+       )
     end
 
     # Canonical method_name is "a".
@@ -315,6 +327,16 @@ module Machete
       '"\\xF"'.should be_parsed_as(LiteralMatcher.new("\xF"))
       '"\\x12"'.should be_parsed_as(LiteralMatcher.new("\x12"))
       '"abc"'.should be_parsed_as(LiteralMatcher.new("abc"))
+    end
+
+    # Canonical REGEXP is /regexp/.
+    it "parses REGEXP" do
+      "//".should be_parsed_as(LiteralMatcher.new(//))
+      "/regexp/".should be_parsed_as(LiteralMatcher.new(/regexp/))
+      '/\/\//'.should be_parsed_as(LiteralMatcher.new(/\/\//))
+      '/[^\w]{1,3}/'.should be_parsed_as(LiteralMatcher.new(/[^\w]{1,3}/))
+      '/[A-Z]?[a-z]*/'.should be_parsed_as(LiteralMatcher.new(/[A-Z]?[a-z]*/))
+      '/\[regexp\]/'.should be_parsed_as(LiteralMatcher.new(/\[regexp\]/))
     end
 
     # Canonical ANY is "any".
