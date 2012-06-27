@@ -288,7 +288,7 @@ COMPLEX_TOKENS = [
   ],
   [
     :REGEXP,
-     /^\/[\s\d\w\?\*\+\{\},\[\]\(\)\^\$\.\\\|\-(\\\/)]*\//x
+     /^\/[\s\d\w\?\*\+\{\},\[\]\(\)\^\$\.\\\/\|\-!@#%&-+'":;`~=]*?\//x
   ],
   # ANY, EVEN and ODD need to be before METHOD_NAME, otherwise they would be
   # recognized as method names.

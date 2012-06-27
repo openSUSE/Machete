@@ -335,7 +335,7 @@ module Machete
     # Canonical REGEXP is /regexp/.
     it "parses REGEXP" do
       "//".should be_parsed_as(LiteralMatcher.new(//))
-      '/\//'.should be_parsed_as(LiteralMatcher.new(/\//))
+      '/(\/)/'.should be_parsed_as(LiteralMatcher.new(/\//))
       "/a/".should be_parsed_as(LiteralMatcher.new(/a/))
       '/a$/'.should be_parsed_as(LiteralMatcher.new(/a$/))
       '/a+/'.should be_parsed_as(LiteralMatcher.new(/a+/))
@@ -343,7 +343,7 @@ module Machete
       '/a{1,3}/'.should be_parsed_as(LiteralMatcher.new(/a{1,3}/))
       '/[a-b]/'.should be_parsed_as(LiteralMatcher.new(/[a-b]/))
       '/(.*)?/'.should be_parsed_as(LiteralMatcher.new(/(.*)?/))
-      '///'.should_not be_parsed_as(LiteralMatcher.new(/\//))
+      '/[(=|&|-|:)]/'.should be_parsed_as(LiteralMatcher.new(/[(=|&|-|:)]/))
     end
 
     # Canonical ANY is "any".
