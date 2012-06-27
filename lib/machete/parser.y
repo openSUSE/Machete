@@ -84,7 +84,7 @@ attr : method_name "=" expression { result = { val[0].to_sym => val[2] } }
            )
          }
        }
-     | method_name "@=" REGEXP {
+     | method_name "*=" REGEXP {
          result = {
            val[0].to_sym => RegexpMatcher.new(
              Regexp.new(regexp_value(val[2]))
@@ -225,7 +225,6 @@ SIMPLE_TOKENS = [
   "[",
   "]",
   "*=",
-  "@=",
   "*",
   "+",
   "?",
@@ -289,11 +288,7 @@ COMPLEX_TOKENS = [
   ],
   [
     :REGEXP,
-    /^
-      \/
-      .*
-      \/
-    /x
+     /^\/[\s\d\w\?\*\+\{\},\[\]\(\)\^\$\.\\\|\-(\\\/)]*\//x
   ],
   # ANY, EVEN and ODD need to be before METHOD_NAME, otherwise they would be
   # recognized as method names.
